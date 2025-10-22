@@ -1,0 +1,58 @@
+/* 기존 G, N, I 애니메이션 (그리기 효과) */
+.text-g,
+.text-n,
+.text-i {
+    fill: blue;
+    stroke: red;
+    stroke-width: 5px;
+    animation-name: draw;
+    animation-duration: 5s;
+    animation-fill-mode: forwards; /* 애니메이션 끝난 후 마지막 상태 유지 */
+}
+
+/* 새로 추가하는 비 효과 애니메이션 */
+.rain-drop {
+    stroke: white; /* 흰색 선 */
+    stroke-width: 1.5px; /* 선 두께 조절 (원하는 대로) */
+    stroke-dasharray: 100 200; /* 짧은 선, 긴 빈 공간 */
+    stroke-dashoffset: 10; /* 시작 위치 조정 */
+    animation: rain 3s linear infinite; /* rain 애니메이션 2초 동안 반복 */
+    opacity: 0.8; /* 약간 투명하게 */
+}
+
+/* rain 애니메이션 키프레임 정의 */
+@keyframes rain {
+    0% {
+        stroke-dashoffset: 1000;
+        opacity: 3;
+        transform: translateY(0); /* 시작 위치 */
+    }
+    10% {
+        opacity: 3; /* 나타나는 동안 불투명도 증가 */
+    }
+    80% {
+        opacity: 3; /* 유지 */
+    }
+    100% {
+        stroke-dashoffset: 500; /* 선이 그려지는 효과 */
+        opacity: 0; /* 사라지면서 투명해짐 */
+        transform: translateY(100px); /* 아래로 이동하는 효과 (비가 떨어지는 것처럼) */
+    }
+}
+
+/* 기존 svg-item 스타일 */
+.svg-item {
+    fill: blue;
+    stroke: yellow;
+    stroke-width: 5px;
+}
+
+/* draw 애니메이션 키프레임 정의 (기존 코드와 동일) */
+@keyframes draw {
+    from {
+        stroke-dashoffset: 2000;
+    }
+    to {
+        stroke-dashoffset: 100;
+    }
+}
