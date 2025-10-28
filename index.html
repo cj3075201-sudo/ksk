@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chainsaw Man: Reze Arc</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+    <style>
+        /* --- 1. 기본 설정 --- */
+        body { margin: 0; background-color: #000; overflow: hidden; font-family: sans-serif; }
+
+        /* --- 레터박스 --- */
+        .letterbox { position: fixed; left: 0; width: 100%; height: 12vh; background-color: black; z-index: 9999; opacity: 0; transition: transform 0.5s ease-out, opacity 0.5s ease-out; pointer-events: none; }
+        .letterbox.top { top: 0; transform: translateY(-100%); }
+        .letterbox.bottom { bottom: 0; transform: translateY(100%); }
+        body.cinematic .letterbox { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* --- 장면 공통 --- */
+        .scene { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: none; }
+        #scene-cafe { display: block; }
+        .background-img, #slideshow-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        #slideshow-img { opacity: 0; transition: opacity 1s ease-in-out; }
+
+        /* --- 장면 1 --- */
+        @keyframes subtle-zoom { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        #scene-cafe .background-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; animation: subtle-zoom 15s ease-in-out infinite alternate; }
+        
+        /* ★ BOOM 버튼 (하트 모양 복구) ★ */
+        .boom-button { 
+            position: absolute; bottom: 50px; right: 50px; width: 80px; height: 85px; /* 하트 크기 기준 */
+            background-color: transparent; cursor: pointer; z-index: 100; transition: transform 0.2s, filter 0.2s; 
+            border: none; padding: 0; transform-origin: center bottom; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        /* 하트 모양 CSS */
+        .boom-button::before, .boom-button::after { 
+            content: ""; position: absolute; width: 40px; height: 85px; 
+            background-color: rgba(255, 0, 0, 0.7); border-radius: 20px 20px 0 0; top: 0; 
+            transition: background-color 0.2s; 
+        }
+        .boom-button::before { left: 40px; transform: rotate(-45deg); transform-origin: 0 100%; }
+        .boom-button::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        .boom-button span { position: relative; z-index: 1; color: white; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        /* 호버 효과 */
+        .boom-button:hover::before, .boom-button:hover::after { background-color: rgba(255, 0, 0, 1); }
+        .boom-button:hover { transform: scale(1.1); filter: drop-shadow(0 0 10px red); }
+        
+        /* PNG 관련 스타일 제거 */
+        /* #bomb-img { display: none; } */
+
+
+        /* 하트 파티클 스타일 */
+        .heart-particle { position: absolute; width: 15px; height: 12px; background-color: rgba(255, 0, 0, 0.4); pointer-events: none; z-index: 12; transition: transform 1s ease-out, opacity 1s ease-out; transform-origin: center center; }
+        .heart-particle::before, .heart-particle::after { content: ""; position: absolute; width: 100%; height: 100%; background-color: inherit; border-radius: 50% 50% 0 0; }
+        .heart-particle::before { left: -50%; transform: rotate(-45deg); transform-origin: 100% 100%; }
+        .heart-particle::after { left: 50%; transform: rotate(45deg); transform-origin: 0 100%; }
+
+        /* 타이틀 오버레이 스타일 */
+        .title-overlay { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); color: #33262F; text-align: center; font-family: 'Arial Black', sans-serif; opacity: 0; transition: opacity 2s ease-in-out 1s; z-index: 99; pointer-events: none; }
+        .title-overlay h1 { font-size: 3em; margin: 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .title-overlay p { font-size: 1.5em; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .title-overlay.visible { opacity: 0.8; }
+
+        /* --- 장면 2.5: 질문 장면 --- */
+        #scene-question { background-color: black; z-index: 15; display: none; }
+        .question-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 4em; text-align: center; opacity: 0; transition: opacity 0.5s ease-in-out; width: 100%; }
+        #denji-text { font-weight: bold; }
+        @keyframes text-glitch { 0% { text-shadow: 2px 0px #f0f; filter: blur(0px); } 30% { text-shadow: -2px 0px #0ff; filter: blur(0px); } 50% { text-shadow: 2px 2px #f0f; filter: blur(1px); } 70% { text-shadow: -2px -2px #0ff; filter: blur(0px); } 100% { text-shadow: 0px 0px transparent; filter: blur(0px); } }
+        .question-text.glitch-active { animation: text-glitch 0.2s infinite; }
+
+        /* --- 장면 3 (폭발) --- */
+        #scene-explosion { display: none; z-index: 20; background-color: rgba(0, 0, 0, 0.5); }
+        .explosion-effect { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background-color: #ffcc00; border-radius: 50%; transform: translate(-50%, -50%); opacity: 0; }
+        @keyframes explode { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(100); opacity: 0; } }
+        #scene-explosion.is-exploding .explosion-effect { animation: explode 0.5s ease-out forwards; }
+        @keyframes shake-explosion { 0% { transform: translate(0, 0); } 25% { transform: translate(-10px, 10px); } 50% { transform: translate(10px, -10px); } 75% { transform: translate(-10px, -10px); } 100% { transform: translate(0, 0); } }
+        #scene-explosion.is-shaking { animation: shake-explosion 0.5s; }
+
+        /* --- 장면 4 (전투씬) --- */
+        #scene-fight { cursor: none; }
+        #scene-fight .background-img { object-fit: contain; } /* 짤림 방지 */
+        .chainsaw-scratch { position: absolute; height: 5px; background-color: white; pointer-events: none; z-index: 12; transition: opacity 1s ease-out; transform-origin: left center; opacity: 0.8; }
+        .bomb-explosion-effect { position: absolute; width: 150px; height: 150px; background-image: url('asset/explosion.png'); background-size: cover; pointer-events: none; z-index: 13; opacity: 0; animation: bombExplode 0.5s ease-out forwards; transform-origin: center center; }
+        @keyframes bombExplode { 0% { transform: scale(0.2); opacity: 0; filter: blur(5px); } 50% { transform: scale(1.5); opacity: 1; filter: blur(0px); } 100% { transform: scale(1.8); opacity: 0; filter: blur(3px); } }
+        @keyframes ripple-wave { 0% { filter: blur(0) brightness(1) contrast(1); transform: scale(1); } 30% { filter: blur(1px) brightness(1.2) contrast(1.5); transform: scale(1.005); } 100% { filter: blur(0) brightness(1) contrast(1); transform: scale(1); } }
+        body.explosion-shock { animation: ripple-wave 0.3s ease-out forwards; }
+
+    </style>
+</head>
+<body>
+    <audio id="sfx-boom" src="asset/boom.mp3" preload="auto"></audio>
+    <audio id="bgm-fight" src="asset/fight.mp3" loop preload="auto"></audio>
+    <audio id="bgm-slideshow" src="asset/bg2.mp3" loop preload="auto"></audio>
+    <audio id="bgm-question" src="asset/bg3.mp3" preload="auto"></audio>
+    <audio id="sfx-bomb" src="asset/bomb_sfx.mp3" preload="auto"></audio>
+
+    <div class="letterbox top"></div>
+    <div class="letterbox bottom"></div>
+
+    <div id="particle-container"></div>
+    <div id="effect-container"></div>
+
+    <div class="scene" id="scene-cafe">
+        <img src="asset/main.png" class="background-img">
+        <div class="title-overlay">
+            <h1 style="color: #33262F;">Chainsaw Man</h1>
+            <p style="color: #33262F;">REZE ARC</p>
+        </div>
+        <button class="boom-button" id="start-boom"><span>BOOM</span></button>
+    </div>
+
+    <div class="scene" id="scene-slideshow">
+        <img src="" id="slideshow-img">
+    </div>
+
+    <div class="scene" id="scene-question">
+        <div class="question-text" id="denji-text">덴지</div>
+        <div class="question-text" id="question-text">나 말고<br>좋아하는 사람 있지?</div>
+    </div>
+
+    <div class="scene" id="scene-explosion">
+        <div class="explosion-effect"></div>
+    </div>
+
+    <div class="scene" id="scene-fight">
+        <img src="asset/10.png" class="background-img">
+    </div>
+
+    <script>
+    $(document).ready(function(){
+        // 오디오 요소
+        const sfxBoom = $('#sfx-boom')[0];
+        const bgmFight = $('#bgm-fight')[0];
+        const bgmSlideshow = $('#bgm-slideshow')[0];
+        const bgmQuestion = $('#bgm-question')[0];
+        const sfxBomb = $('#sfx-bomb')[0];
+
+        // 파티클 생성 속도를 제어할 변수
+        let lastParticleTime = 0; 
+        const minParticleInterval = 10;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // 마우스 파티클 효과 (장면에 따라 변경)
+        $(document).on('mousemove', function(e) {
+            const currentTime = new Date().getTime(); 
+            const mouseX = e.pageX;
+            const mouseY = e.pageY;
+
+            if (currentTime - lastParticleTime < minParticleInterval) {
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+                return; 
+            }
+            lastParticleTime = currentTime; 
+
+            // 1. 카페 장면일 때 (하트 파티클)
+            if ($('#scene-cafe').is(':visible')) {
+                const particle = $('<div class="heart-particle"></div>');
+                particle.css({ top: mouseY + 'px', left: mouseX + 'px' });
+                $('#particle-container').append(particle);
+                
+                setTimeout(function() {
+                    const moveX = (Math.random() - 0.5) * 100;
+                    const moveY = (Math.random() - 0.5) * 100;
+                    const rotate = Math.random() * 360;
+                    particle.css({ 'transform': 'translate(' + moveX + 'px, ' + moveY + 'px) rotate(' + rotate + 'deg)', 'opacity': 0 });
+                    setTimeout(function() { particle.remove(); }, 1000); 
+                }, Math.random() * 150); 
+            }
+            // 2. 전투 장면일 때 (톱 스크래치 효과)
+            else if ($('#scene-fight').is(':visible')) {
+                const distance = Math.hypot(mouseX - lastMouseX, mouseY - lastMouseY);
+                
+                if (distance > 10) { 
+                    const scratch = $('<div class="chainsaw-scratch"></div>');
+                    const width = distance * 2;
+                    const angle = Math.atan2(mouseY - lastMouseY, mouseX - lastMouseX);
+                    
+                    scratch.css({ 'top': mouseY + 'px', 'left': mouseX + 'px', 'width': width + 'px', 'transform': `rotate(${angle}rad)` });
+                    $('#effect-container').append(scratch);
+                    
+                    setTimeout(function() {
+                        scratch.css('opacity', 0);
+                        setTimeout(function() { scratch.remove(); }, 1000);
+                    }, 10); 
+                }
+            }
+
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+        });
+
+        // 전투씬 클릭 이벤트 (레제 폭탄 공격 + 충격파)
+        $(document).on('click', function(e) {
+            if ($('#scene-fight').is(':visible')) {
+                
+                // 1. 폭발 이펙트 생성
+                const bombEffect = $('<div class="bomb-explosion-effect"></div>');
+                bombEffect.css({ top: e.pageY + 'px', left: e.pageX + 'px' });
+                $('#effect-container').append(bombEffect);
+                try { sfxBomb.play(); } catch(error) {}
+
+                // 2. 충격파 애니메이션 실행
+                $('body').addClass('explosion-shock');
+                setTimeout(function() {
+                    $('body').removeClass('explosion-shock');
+                }, 300);
+                
+                setTimeout(function() { bombEffect.remove(); }, 500);
+            }
+        });
+
+
+        // 타이틀 서서히 등장
+        $('.title-overlay').addClass('visible');
+
+        // 슬라이드쇼 설정
+        const slideshowImages = [ 'asset/1.png', 'asset/2.png', 'asset/3.png', 'asset/4.png', 'asset/5.png', 'asset/6.png', 'asset/7.png', 'asset/8.png' ];
+        let currentSlide = 0;
+        let slideshowTimeout;
+
+        // BOOM 버튼 클릭
+        $('#start-boom').on('click', function(){
+            $('body').addClass('cinematic');
+            // BGM은 제거됨
+            $(this).prop('disabled', true);
+            $('.title-overlay').removeClass('visible');
+            $('#scene-cafe').fadeOut(500, function() {
+                 $('#scene-slideshow').fadeIn(500);
+                 try { bgmSlideshow.play(); } catch(e) {}
+                 showNextSlide();
+            });
+        });
+
+        // 슬라이드 쇼 함수
+        function showNextSlide() {
+            if (currentSlide < slideshowImages.length) {
+                 $('#slideshow-img').attr('src', slideshowImages[currentSlide]);
+                 setTimeout(function(){ $('#slideshow-img').css('opacity', 1); }, 50);
+                slideshowTimeout = setTimeout(function(){
+                    $('#slideshow-img').css('opacity', 0);
+                    setTimeout(function(){ currentSlide++; showNextSlide(); }, 1000);
+                }, 1125 + 50);
+            } else {
+                startQuestionScene();
+            }
+        }
+
+        // 질문 장면 함수
+        function startQuestionScene() {
+            clearTimeout(slideshowTimeout);
+            $('#scene-slideshow').fadeOut();
+            try { bgmSlideshow.pause(); bgmSlideshow.currentTime = 0; } catch(e) {}
+            $('#scene-question').fadeIn();
+            try { bgmQuestion.play(); } catch(e) {}
+            
+            $('#denji-text').css('opacity', 1).addClass('glitch-active');
+            setTimeout(function(){
+                $('#denji-text').css('opacity', 0).removeClass('glitch-active');
+                $('#question-text').css('opacity', 1).addClass('glitch-active');
+            }, 1500);
+            setTimeout(function(){
+                $('#question-text').css('opacity', 0).removeClass('glitch-active');
+                try { bgmQuestion.pause(); } catch(e) {}
+                $('#scene-question').fadeOut(0, function() { triggerExplosion(); });
+            }, 6000);
+        }
+
+        // 폭발 함수
+        function triggerExplosion() {
+            // #scene-explosion에 흔들림 클래스 추가
+            $('#scene-explosion').show().addClass('is-exploding').addClass('is-shaking'); 
+            
+            $('#scene-explosion').css('background-image', 'url(asset/9.png)').css('background-size', 'cover');
+            // try { bgmCafe.pause(); bgmCafe.currentTime = 0; } catch(e) {} <-- 제거됨
+            try { sfxBoom.play(); } catch(e) {}
+            
+            // 3초 뒤 전환
+            setTimeout(function(){
+                // #scene-explosion에서 흔들림 클래스 제거 (버그 방지)
+                $('#scene-explosion').removeClass('is-shaking'); 
+                
+                // 0ms로 즉시 다음 장면 호출
+                $('#scene-explosion').fadeOut(0, function() {
+                    $('#scene-fight').fadeIn();
+                    try { bgmFight.play(); } catch(e) {}
+                });
+            }, 4000);
+        }
+    });
+    </script>
+</body>
+</html>
