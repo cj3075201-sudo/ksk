@@ -1,0 +1,314 @@
+/* ========================================
+   1. 기본 설정 (General Setup)
+   ======================================== */
+body {
+    margin: 0;
+    background-color: #000;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+/* ========================================
+   2. 레터박스 (Letterbox)
+   ======================================== */
+.letterbox {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 12vh;
+    background-color: black;
+    z-index: 9999;
+    opacity: 0;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    pointer-events: none;
+}
+.letterbox.top {
+    top: 0;
+    transform: translateY(-100%);
+}
+.letterbox.bottom {
+    bottom: 0;
+    transform: translateY(100%);
+}
+body.cinematic .letterbox {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* ========================================
+   3. 장면 공통 스타일 (Common Scene Styles)
+   ======================================== */
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+}
+#scene-cafe {
+    display: block;
+}
+.background-img,
+#slideshow-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+#slideshow-img {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+/* ========================================
+   4. 특정 장면 스타일 (Specific Scene Styles)
+   ======================================== */
+
+/* --- 4.1 장면 1: 카페 (Scene Cafe) --- */
+@keyframes subtle-zoom {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+#scene-cafe .background-img {
+    animation: subtle-zoom 15s ease-in-out infinite alternate;
+}
+
+/* --- 4.1.1 BOOM 버튼 (하트 모양) --- */
+.boom-button {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    width: 80px;
+    height: 85px;
+    background-color: transparent;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s, filter 0.2s;
+    border: none;
+    padding: 0;
+    transform-origin: center bottom;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.boom-button::before,
+.boom-button::after {
+    content: "";
+    position: absolute;
+    width: 40px;
+    height: 85px;
+    background-color: rgba(255, 0, 0, 0.7);
+    border-radius: 20px 20px 0 0;
+    top: 0;
+    transition: background-color 0.2s;
+}
+.boom-button::before {
+    left: 40px;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+.boom-button::after {
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+.boom-button span {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.boom-button:hover::before,
+.boom-button:hover::after {
+    background-color: rgba(255, 0, 0, 1);
+}
+.boom-button:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px red);
+}
+
+/* --- 4.1.2 타이틀 오버레이 --- */
+.title-overlay {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #33262F;
+    text-align: center;
+    font-family: 'Arial Black', sans-serif;
+    opacity: 0;
+    transition: opacity 2s ease-in-out 1s;
+    z-index: 99;
+    pointer-events: none;
+}
+.title-overlay h1 {
+    font-size: 3em;
+    margin: 0;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+.title-overlay p {
+    font-size: 1.5em;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+.title-overlay.visible {
+    opacity: 0.8;
+}
+
+/* --- 4.2 장면 2.5: 질문 (Scene Question) --- */
+#scene-question {
+    background-color: black;
+    z-index: 15;
+    display: none;
+}
+.question-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 4em;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    width: 100%;
+}
+#denji-text {
+    font-weight: bold;
+}
+@keyframes text-glitch {
+    0%   { text-shadow:  2px  0px #f0f; filter: blur(0px); }
+    30%  { text-shadow: -2px  0px #0ff; filter: blur(0px); }
+    50%  { text-shadow:  2px  2px #f0f; filter: blur(1px); }
+    70%  { text-shadow: -2px -2px #0ff; filter: blur(0px); }
+    100% { text-shadow:  0px  0px transparent; filter: blur(0px); }
+}
+.question-text.glitch-active {
+    animation: text-glitch 0.2s infinite;
+}
+
+/* --- 4.3 장면 3: 폭발 (Scene Explosion) --- */
+#scene-explosion {
+    display: none;
+    z-index: 20;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.explosion-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: #ffcc00;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+@keyframes explode {
+    0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(100); opacity: 0; }
+}
+#scene-explosion.is-exploding .explosion-effect {
+    animation: explode 0.5s ease-out forwards;
+}
+@keyframes shake-explosion {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-10px, 10px); }
+    50%  { transform: translate(10px, -10px); }
+    75%  { transform: translate(-10px, -10px); }
+    100% { transform: translate(0, 0); }
+}
+#scene-explosion.is-shaking {
+    animation: shake-explosion 0.5s;
+}
+
+/* --- 4.4 장면 4: 전투 (Scene Fight) --- */
+#scene-fight {
+    cursor: none;
+}
+#scene-fight .background-img {
+    object-fit: contain;
+}
+
+/* ========================================
+   5. 효과 스타일 (Effects Styles)
+   ======================================== */
+
+/* --- 5.1 하트 파티클 --- */
+.heart-particle {
+    position: absolute;
+    width: 15px;
+    height: 12px;
+    background-color: rgba(255, 0, 0, 0.4);
+    pointer-events: none;
+    z-index: 12;
+    transition: transform 1s ease-out, opacity 1s ease-out;
+    transform-origin: center center;
+}
+.heart-particle::before,
+.heart-particle::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: 50% 50% 0 0;
+}
+.heart-particle::before {
+    left: -50%;
+    transform: rotate(-45deg);
+    transform-origin: 100% 100%;
+}
+.heart-particle::after {
+    left: 50%;
+    transform: rotate(45deg);
+    transform-origin: 0 100%;
+}
+
+/* --- 5.2 톱 스크래치 --- */
+.chainsaw-scratch {
+    position: absolute;
+    height: 5px;
+    background-color: white;
+    pointer-events: none;
+    z-index: 12;
+    transition: opacity 1s ease-out;
+    transform-origin: left center;
+    opacity: 0.8;
+}
+
+/* --- 5.3 폭탄 폭발 (클릭 시) --- */
+.bomb-explosion-effect {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background-image: url('asset/explosion.png');
+    background-size: cover;
+    pointer-events: none;
+    z-index: 13;
+    opacity: 0;
+    animation: bombExplode 0.5s ease-out forwards;
+    transform-origin: center center;
+}
+@keyframes bombExplode {
+    0%   { transform: scale(0.2); opacity: 0; filter: blur(5px); }
+    50%  { transform: scale(1.5); opacity: 1; filter: blur(0px); }
+    100% { transform: scale(1.8); opacity: 0; filter: blur(3px); }
+}
+
+/* --- 5.4 충격파 (화면 전체 효과) --- */
+@keyframes ripple-wave {
+    0%   { filter: blur(0) brightness(1) contrast(1); transform: scale(1); }
+    30%  { filter: blur(1px) brightness(1.2) contrast(1.5); transform: scale(1.005); }
+    100% { filter: blur(0) brightness(1) contrast(1); transform: scale(1); }
+}
+body.explosion-shock {
+    animation: ripple-wave 0.3s ease-out forwards;
+}

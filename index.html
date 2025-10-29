@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chainsaw Man: Reze Arc</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</head>
+<body>
+    <audio id="sfx-boom" src="asset/boom.mp3" preload="auto"></audio>
+    <audio id="bgm-fight" src="asset/fight.mp3" loop preload="auto"></audio>
+    <audio id="bgm-slideshow" src="asset/bg2.mp3" loop preload="auto"></audio>
+    <audio id="bgm-question" src="asset/bg3.mp3" preload="auto"></audio>
+    <audio id="sfx-bomb" src="asset/bomb_sfx.mp3" preload="auto"></audio>
+
+    <div class="letterbox top"></div>
+    <div class="letterbox bottom"></div>
+
+    <div id="particle-container"></div>
+    <div id="effect-container"></div>
+
+    <div class="scene" id="scene-cafe">
+        <img src="asset/main.png" class="background-img">
+        <div class="title-overlay">
+            <h1 style="color: #33262F;">Chainsaw Man</h1>
+            <p style="color: #33262F;">REZE ARC</p>
+        </div>
+        <button class="boom-button" id="start-boom"><span>BOOM</span></button>
+    </div>
+
+    <div class="scene" id="scene-slideshow">
+        <img src="" id="slideshow-img">
+    </div>
+
+    <div class="scene" id="scene-question">
+        <div class="question-text" id="denji-text">덴지</div>
+        <div class="question-text" id="question-text">나 말고<br>좋아하는 사람 있지?</div>
+    </div>
+
+    <div class="scene" id="scene-explosion">
+        <div class="explosion-effect"></div>
+    </div>
+
+    <div class="scene" id="scene-fight">
+        <img src="asset/10.png" class="background-img">
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
